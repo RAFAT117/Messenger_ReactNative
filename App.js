@@ -10,51 +10,62 @@ import ChatScreen from './screens/ChatScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import AddFriendScreen from './screens/AddFriendScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
 
 const firebaseApp = initializeApp(firebaseConfig);
 
 const Stack = createStackNavigator();
+
 const Tab = createBottomTabNavigator();
 
-
-function MainTabs() {
+function BottomTabs() {
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          if (route.name === 'Conversations') {
-            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-          } else if (route.name === 'Chat') {
-            iconName = focused ? 'chatbox' : 'chatbox-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
-
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-      })}
-    >
-      <Tab.Screen name="Conversations" component={ConversationsScreen} />
-      <Tab.Screen name="Chat" component={ChatScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+    <Tab.Navigator>
+      <Tab.Screen 
+        name="Conversations" 
+        component={ConversationsScreen}
+        options={{
+          tabBarLabel: 'Conversations',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubbles-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="AddFriend" 
+        component={AddFriendScreen}
+        options={{
+          tabBarLabel: 'Add Friend',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-add-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" color={color} size={size} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
+
 
 export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="Conversations" component={ConversationsScreen}  />
+        <Stack.Screen name="Main" component={BottomTabs} options={{ headerShown: false }} />
         <Stack.Screen name="Chat" component={ChatScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 
-const ProfileScreen = () => {
+function ProfileScreen() {
     return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text>User Profile</Text>
-        </View>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>Profile Screen</Text>
+      </View>
     );
-}
-
-export default ProfileScreen;
+  }
+  export default ProfileScreen;
