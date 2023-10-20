@@ -12,6 +12,9 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import AddFriendScreen from './screens/AddFriendScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
+import SelectFriendScreen from './screens/SelectFriendScreen';
+
+
 
 const firebaseApp = initializeApp(firebaseConfig);
 
@@ -64,6 +67,7 @@ export default function App() {
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="SelectFriend" component={SelectFriendScreen} />
         <Stack.Screen name="Main" component={BottomTabs} options={{ headerShown: false }} />
         <Stack.Screen name="Chat" component={ChatScreen} />
       </Stack.Navigator>
