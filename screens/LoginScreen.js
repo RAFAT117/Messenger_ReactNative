@@ -70,13 +70,14 @@ value={keepLoggedIn}
       .catch((error) => {
         const errorCode = error.code;
         let errorMessage = error.message;
-
-        if (errorCode === 'auth/invalid-email' || errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') {
+      
+        if (errorCode === 'auth/invalid-email' || errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-login-credentials') {
           errorMessage = "Incorrect email or password. Try again.";
         }
-        
+              
         alert(errorMessage);
       });
+      
   }}>
       <Text style={AppStyles.buttonText}>Login</Text>
       </TouchableOpacity>

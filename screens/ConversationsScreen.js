@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth } from 'firebase/auth';
 import { View, Text, FlatList } from 'react-native';
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
 import AppStyles from '../Styling/AppStyles'; 
 
 function ConversationsScreen({ navigation }) {
@@ -10,28 +10,36 @@ function ConversationsScreen({ navigation }) {
     const db = getFirestore();
     const currentUser = auth.currentUser;
 
-    useEffect(() => {
-        const fetchFriendNames = async () => {
-            if (currentUser) {
-                const userDoc = doc(db, 'users', currentUser.uid);
-                const userData = (await getDoc(userDoc)).data();
-                const friendsUIDs = userData.friends || [];
-                const fetchedFriendsData = [];
+    const fetchFriendNames = async () => {
+        if (currentUser) {
+            const userDoc = doc(db, 'users', currentUser.uid);
+            const userData = (await getDoc(userDoc)).data();
+            const friendsUIDs = userData.friends || [];
+            const fetchedFriendsData = [];
 
-                for (let friendUID of friendsUIDs) {
-                    const friendDoc = doc(db, 'users', friendUID);
-                    const friendData = (await getDoc(friendDoc)).data();
-                    fetchedFriendsData.push({
-                        uid: friendUID,
-                        name: friendData.name // assuming the friend's name is stored under "name" in the database
-                    });
-                }
-
-                setFriendsData(fetchedFriendsData);
+            for (let friendUID of friendsUIDs) {
+                const friendDoc = doc(db, 'users', friendUID);
+                const friendData = (await getDoc(friendDoc)).data();
+                fetchedFriendsData.push({
+                    uid: friendUID,
+                    name: friendData.name
+                });
             }
-        };
 
-        fetchFriendNames();
+            setFriendsData(fetchedFriendsData);
+        }
+    };
+
+    useEffect(() => {
+        const userDoc = doc(db, 'users', currentUser.uid);
+
+        const unsubscribe = onSnapshot(userDoc, (snapshot) => {
+            fetchFriendNames();
+        });
+
+        // Clean up the listener on unmount
+        return () => unsubscribe();
+
     }, []);
 
     return (
