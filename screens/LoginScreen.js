@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TextInput, Button, StyleSheet, Switch } from 'react-native';
+import { View,TouchableOpacity, Text, TextInput, Button, Switch } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppStyles from '../Styling/AppStyles'; 
+
 
 function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -27,31 +29,32 @@ function LoginScreen() {
   }, []);
   
   return (
-    <View style={styles.container}>
+    <View style={AppStyles.container}>
       <TextInput
-        style={styles.input}
+        style={AppStyles.input}
         placeholder="Email" 
         value={email}
         onChangeText={text => setEmail(text)}
       />
       <TextInput
-        style={styles.input}
+        style={AppStyles.input}
         placeholder="Password" 
         secureTextEntry={true}
         value={password}
         onChangeText={text => setPassword(text)}
       />
 
-      <View style={styles.switchContainer}>
+      <View style={AppStyles.switchContainer}>
 <Switch
 trackColor={{ false: "#767577", true: "#81b0ff" }}
 thumbColor={keepLoggedIn ? "#f5dd4b" : "#f4f3f4"}
 onValueChange={() => setKeepLoggedIn(previousState => !previousState)}
 value={keepLoggedIn}
 />
-<Text>Håll mig inloggad</Text>
+<Text> keep me logged in</Text>
 </View>
-<Button title="Log in" onPress={() => {
+
+<TouchableOpacity style={AppStyles.loginButton} onPress={() => {
     const auth = getAuth();
     
     signInWithEmailAndPassword(auth, email, password)
@@ -69,42 +72,20 @@ value={keepLoggedIn}
         let errorMessage = error.message;
 
         if (errorCode === 'auth/invalid-email' || errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') {
-          errorMessage = "Fel e-post eller lösenord. Försök igen.";
+          errorMessage = "Incorrect email or password. Try again.";
         }
         
         alert(errorMessage);
       });
-  }} />
+  }}>
+      <Text style={AppStyles.buttonText}>Login</Text>
+      </TouchableOpacity>
+
 
   <Text onPress={() => navigation.navigate('Register')}>Don't have an account? Register</Text>
 </View>
 );
 }
 
-const styles = StyleSheet.create({
-container: {
-flex: 1,
-justifyContent: 'center',
-alignItems: 'center',
-padding: 20
-},
-input: {
-width: '100%',
-padding: 15,
-marginBottom: 10,
-borderColor: '#ccc',
-borderWidth: 1,
-borderRadius: 5
-},
-switchContainer: {
-flexDirection: 'row',
-alignItems: 'center',
-marginBottom: 20
-},
-link: {
-marginTop: 15,
-color: '#007BFF'
-}
-});
 
 export default LoginScreen;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getAuth } from 'firebase/auth';
 import { View, Text, FlatList } from 'react-native';
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import AppStyles from '../Styling/AppStyles'; 
 
 function ConversationsScreen({ navigation }) {
     const [friendsData, setFriendsData] = useState([]);
@@ -34,10 +35,10 @@ function ConversationsScreen({ navigation }) {
     }, []);
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={AppStyles.freinds_container}>
             {
                 friendsData.length === 0 ?
-                    <Text>No friends available.</Text> :
+                <Text style={AppStyles.noFriendsText}>No friends available.</Text> :
 
                     <FlatList
                         data={friendsData}
@@ -45,7 +46,7 @@ function ConversationsScreen({ navigation }) {
                         renderItem={({ item }) => (
                             <View>
                                 <Text
-                                    style={{ padding: 10 }}
+                                    style={AppStyles.friendName}
                                     onPress={() => navigation.navigate('Chat', { friendUID: item.uid })}
                                 >
                                     {item.name}
