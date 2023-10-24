@@ -26,10 +26,10 @@ function BottomTabs() {
   return (
     <Tab.Navigator>
       <Tab.Screen 
-        name="Conversations" 
+        name="Friends" 
         component={ConversationsScreen}
         options={{
-          tabBarLabel: 'Conversations',
+          tabBarLabel: 'Friends',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubbles-outline" color={color} size={size} />
           ),

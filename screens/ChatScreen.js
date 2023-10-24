@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { getFirestore, onSnapshot, arrayUnion, setDoc, doc } from 'firebase/firestore';
 
 function ChatScreen({ route }) {
     const [messages, setMessages] = useState([]);
@@ -11,37 +11,41 @@ function ChatScreen({ route }) {
     const currentUserUID = auth.currentUser.uid;
     const db = getFirestore();
 
+    
+
+    const chatId = [currentUserUID, friendUID].sort().join('_'); // Compute chatId
+    
     // Listen for new messages from Firebase
     useEffect(() => {
-        const messagesRef = collection(db, 'messages');
-        const q = query(
-            messagesRef,
-            where('chatId', '==', [currentUserUID, friendUID].sort().join('_')),
-            orderBy('createdAt', 'desc')
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const firebaseMessages = snapshot.docs.map(doc => ({
-                ...doc.data(),
-                createdAt: doc.data().createdAt.toDate() // Convert Firebase timestamp to JavaScript Date object
-            }));
-            setMessages(firebaseMessages);
-        });
-
-        return () => unsubscribe(); // Cleanup on unmount
-    }, []);
-
-    const onSend = async (newMessages = []) => {
-        const message = newMessages[0];
-        const messagesRef = collection(db, 'messages');
-        await addDoc(messagesRef, {
-            ...message,
-            chatId: [currentUserUID, friendUID].sort().join('_'),
-            user: {
-                ...message.user,
-                _id: currentUserUID // Set current user's UID
+        const messagesRef = doc(db, 'chats', chatId);
+    
+        const unsubscribe = onSnapshot(messagesRef, (documentSnapshot) => {
+            if (documentSnapshot.exists()) {
+                const firebaseMessages = documentSnapshot.data().messages.map(message => ({
+                    ...message,
+                    createdAt: message.createdAt.toDate() 
+                }));
+                setMessages(firebaseMessages.reverse());
             }
         });
+    
+        return () => unsubscribe();
+    }, []);
+    
+    const onSend = async (newMessages = []) => {
+        const message = newMessages[0];
+        
+        const chatRef = doc(db, 'chats', chatId);
+        
+        await setDoc(chatRef, {
+            messages: arrayUnion({
+                ...message,
+                user: {
+                    ...message.user,
+                    _id: currentUserUID 
+                }
+            })
+        }, { merge: true });
     };
 
     return (
@@ -50,7 +54,7 @@ function ChatScreen({ route }) {
             onSend={newMessages => onSend(newMessages)}
             user={{
                 _id: currentUserUID,
-                // You can add additional user properties like name, avatar, etc.
+                // Other user properties here
             }}
         />
     );

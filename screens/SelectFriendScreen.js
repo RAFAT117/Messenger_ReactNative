@@ -5,6 +5,8 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 function SelectFriendScreen({ route, navigation }) {
     const { friends } = route.params;
     const [usernames, setUsernames] = useState([]);
+    const [friendName, setFriendName] = useState("");
+
 
     useEffect(() => {
         const fetchUsernames = async () => {

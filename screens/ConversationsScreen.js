@@ -1,73 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, doc, getDoc, collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { getAuth } from 'firebase/auth';
-import { View, Text, Button, FlatList } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 function ConversationsScreen({ navigation }) {
-    const [friends, setFriends] = useState([]);
-    const [conversations, setConversations] = useState([]);
+    const [friendsData, setFriendsData] = useState([]);
     const auth = getAuth();
     const db = getFirestore();
     const currentUser = auth.currentUser;
 
-    // Fetch friends for the logged-in user
     useEffect(() => {
-        if (currentUser) {
-            const userDoc = doc(db, 'users', currentUser.uid);
-            getDoc(userDoc).then(documentSnapshot => {
-                if (documentSnapshot.exists() && documentSnapshot.data().friends) {
-                    setFriends(documentSnapshot.data().friends);
-                }
-            });
-        }
-    }, []);
+        const fetchFriendNames = async () => {
+            if (currentUser) {
+                const userDoc = doc(db, 'users', currentUser.uid);
+                const userData = (await getDoc(userDoc)).data();
+                const friendsUIDs = userData.friends || [];
+                const fetchedFriendsData = [];
 
-    useEffect(() => {
-      const fetchConversations = async () => {
-          try {
-              // Adjusted the query structure
-              const q = query(collection(db, "messages"), where("participants", "array-contains", currentUser.uid));
-              const querySnapshot = await getDocs(q);
-              const chatData = [];
-              querySnapshot.forEach(doc => {
-                  chatData.push({ ...doc.data(), id: doc.id });
-              });
-              console.log("Fetched chat data:", chatData);
-              setConversations(chatData);
-          } catch (error) {
-              console.error("Error fetching chat data:", error);
-          }
-      }
-  
-      if (currentUser) fetchConversations();
-  }, [currentUser]);
-  
+                for (let friendUID of friendsUIDs) {
+                    const friendDoc = doc(db, 'users', friendUID);
+                    const friendData = (await getDoc(friendDoc)).data();
+                    fetchedFriendsData.push({
+                        uid: friendUID,
+                        name: friendData.name // assuming the friend's name is stored under "name" in the database
+                    });
+                }
+
+                setFriendsData(fetchedFriendsData);
+            }
+        };
+
+        fetchFriendNames();
+    }, []);
 
     return (
         <View style={{ flex: 1 }}>
-            <Button 
-                title="New Chat" 
-                onPress={() => navigation.navigate('SelectFriend', { friends })}
-            />
             {
-                conversations.length === 0 ? 
-                <Text>No conversations available.</Text> : 
-                <FlatList 
-                    data={conversations}
-                    keyExtractor={item => item.id}
-                    renderItem={({ item }) => (
-                      <Text 
-                          style={{ padding: 10 }}
-                          onPress={() => navigation.navigate('ChatScreen', { chatId: item.id })}
-                      >
-                          Chat with {item.participants.filter(uid => uid !== currentUser.uid)[0]}
-                      </Text>
-                  )}
-              />
-          }
-      </View>
-  );
+                friendsData.length === 0 ?
+                    <Text>No friends available.</Text> :
+
+                    <FlatList
+                        data={friendsData}
+                        keyExtractor={(item) => item.uid}
+                        renderItem={({ item }) => (
+                            <View>
+                                <Text
+                                    style={{ padding: 10 }}
+                                    onPress={() => navigation.navigate('Chat', { friendUID: item.uid })}
+                                >
+                                    {item.name}
+                                </Text>
+                            </View>
+                        )}
+                    />
+            }
+        </View>
+    );
 }
 
 export default ConversationsScreen;
-
