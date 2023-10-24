@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-function ProfileScreen({ navigation }) { // <-- Destructure navigation here
+function ProfileScreen({ navigation }) { // 
     const [user, setUser] = useState(null);
     const [profileData, setProfileData] = useState({});
 
@@ -25,15 +26,20 @@ function ProfileScreen({ navigation }) { // <-- Destructure navigation here
 
     const handleLogout = () => {
         const auth = getAuth();
-        signOut(auth).then(() => {
+        signOut(auth).then(async () => {
             // Sign-out successful.
             Alert.alert("Logged out", "You have been logged out successfully!");
-            navigation.navigate('Welcome'); // <-- Use navigation directly here
+    
+            // Remove the @keep_logged_in key from AsyncStorage
+            await AsyncStorage.removeItem('@keep_logged_in');
+            
+            navigation.navigate('Welcome');
         }).catch((error) => {
             // An error happened.
             Alert.alert("Error", "An error occurred while logging out.");
         });
     };
+    
     
 
    
