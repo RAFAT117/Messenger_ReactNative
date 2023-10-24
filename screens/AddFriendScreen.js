@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, FlatList } from 'react-native';
+import { View, Text,TouchableOpacity, TextInput, Button, Alert, FlatList } from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, query, where, getDocs, getDoc, collection, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-
+import AppStyles from '../Styling/AppStyles';
 
 
 function AddFriendScreen() {
@@ -62,32 +62,37 @@ function AddFriendScreen() {
     };
 
     return (
-        <View style={{ flex: 1, padding: 20 }}>
-            <TextInput 
+        <View style={AppStyles.container}>
+        <TextInput 
                 value={searchUsername}
                 onChangeText={setSearchUsername}
                 placeholder="Enter username to search"
-                style={{ borderBottomWidth: 1, marginBottom: 20 }}
-            />
-            <Button title="Send Friend Request" onPress={handleSendFriendRequest} />
+                style={AppStyles.input}
+                />
 
-            <Text style={{ marginTop: 20, marginBottom: 10, fontWeight: 'bold' }}>Friend Requests:</Text>
+            <TouchableOpacity style={AppStyles.f_request_Button} onPress={handleSendFriendRequest}>
+        <Text style={AppStyles.buttonText}>Send Friend Request</Text>
+      </TouchableOpacity>
+      
+
+            <Text style={AppStyles.headerText}>Friend Requests:</Text>
             
             <FlatList 
      data={friendRequestsData}
      keyExtractor={item => item.uid}
      renderItem={({ item }) => (
-         <View style={{ padding: 10, borderBottomWidth: 1, flexDirection: 'row', justifyContent: 'space-between' }}>
-             <Text>{item.username}</Text>
-            <View style={{ flexDirection: 'row' }}>
-                <Button 
-                     title="Accept"
-                     onPress={async () => { 
+        <View style={AppStyles.listItem}>
+        <Text style={AppStyles.listItemText}>{item.username}</Text>
+        <View style={AppStyles.buttonContainer}>
+        <TouchableOpacity 
+                    style={AppStyles.acceptButton}
+                    onPress={async () => {
                          try {
                              // Remove UID from friendRequests of current user
                              await updateDoc(doc(db, 'users', currentUser.uid), {
                                  friendRequests: arrayRemove(item.uid) 
                              });
+
                 
                         // Add UID to friends of current user
                         await updateDoc(doc(db, 'users', currentUser.uid), {
@@ -108,18 +113,21 @@ function AddFriendScreen() {
                           console.error("Error accepting friend request:", error);
                           Alert.alert("Error", "There was an error while processing the friend request.");
                       }
-                  }}
-              />
-                <Button 
-                    title="Decline"
-                    color="red"
-                    onPress={async () => { 
+                  }}>
+                  <Text style={AppStyles.buttonTextAccept}>Accept</Text>
+                  </TouchableOpacity>
+
+
+                
+                <TouchableOpacity 
+                    style={AppStyles.declineButton}
+                    onPress={async () => {
                       try {
                           // Remove UID from friendRequests of current user
                           await updateDoc(doc(db, 'users', currentUser.uid), {
                               friendRequests: arrayRemove(item.uid)
                           });
-                
+
                             // Update the local UI by filtering out the declined request
                             setFriendRequestsData(prevData => prevData.filter(request => request.uid !== item.uid));
                             
@@ -127,8 +135,9 @@ function AddFriendScreen() {
                         } catch (error) {
                             Alert.alert("Error", "There was an error while processing the friend request.");
                         }
-                    }}
-                />
+                    }}>
+                    <Text style={AppStyles.buttonTextDecline}>Decline</Text>
+                </TouchableOpacity>
                 
             </View>
         </View>

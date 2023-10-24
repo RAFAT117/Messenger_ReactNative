@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text,TouchableOpacity, Button, StyleSheet, Alert } from 'react-native';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppStyles from '../Styling/AppStyles'; 
+
 
 function ProfileScreen({ navigation }) { // 
     const [user, setUser] = useState(null);
@@ -44,22 +46,18 @@ function ProfileScreen({ navigation }) { //
 
    
     return (
-        <View style={styles.container}>
-          <Text style={styles.header}>Profile Screen</Text>
+        <View style={AppStyles.container}>
+          <Text style={AppStyles.header}>Profile</Text>
           {user && (
             <>
-              <Text style={styles.infoText}>Email: {user.email}</Text>
-              <Text style={styles.infoText}>Name: {profileData.name}</Text>
-              <Text style={styles.infoText}>Username: {profileData.username}</Text>
+              <Text style={AppStyles.infoText}>Email: {user.email}</Text>
+              <Text style={AppStyles.infoText}>Name: {profileData.name}</Text>
+              <Text style={AppStyles.infoText}>Username: {profileData.username}</Text>
             </>
           )}
-          <Button 
-              title="Log out" 
-              onPress={handleLogout} // <-- Directly call handleLogout here
-              style={styles.button}
-          >
-              <Text style={styles.buttonText}>Log Out</Text>
-          </Button>
+          <TouchableOpacity style={AppStyles.button_logout} onPress={handleLogout}>
+                <Text style={AppStyles.buttonText}>Log Out</Text>
+            </TouchableOpacity>
         </View>
       );
   }

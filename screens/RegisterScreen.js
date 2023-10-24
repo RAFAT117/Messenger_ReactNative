@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text,TouchableOpacity, TextInput, Button, StyleSheet } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import AppStyles from '../Styling/AppStyles'; 
 
 
 function RegisterScreen({ navigation }) {
@@ -80,7 +81,11 @@ function RegisterScreen({ navigation }) {
         onChangeText={setConfirmPassword}
         value={confirmPassword}
       />
-      <Button title="Register" onPress={handleRegister} />
+
+<TouchableOpacity style={AppStyles.registerButton} onPress={handleRegister}>
+                <Text style={AppStyles.buttonText}>Register</Text>
+                </TouchableOpacity>
+
       <Text style={styles.link} onPress={() => navigation.navigate('Login')}>Already have an account? Log in</Text>
     </View>
   );
