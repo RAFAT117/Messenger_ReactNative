@@ -13,13 +13,16 @@ import RegisterScreen from './screens/RegisterScreen';
 import AddFriendScreen from './screens/AddFriendScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
 
-
+// Initialize Firebase with the given config
 const firebaseApp = initializeApp(firebaseConfig);
 
+// Create a stack navigator for screen transitions
 const Stack = createStackNavigator();
 
+// Create a bottom tab navigator for the main app interface
 const Tab = createBottomTabNavigator();
 
+// Define the structure for the bottom tabs
 function BottomTabs() {
   return (
     <Tab.Navigator>
@@ -57,7 +60,7 @@ function BottomTabs() {
   );
 }
 
-
+// Main app component with the navigation structure
 export default function App() {
   return (
     <NavigationContainer>

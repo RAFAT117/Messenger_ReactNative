@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text,TouchableOpacity, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, collection, query,where,getDocs, doc, setDoc } from 'firebase/firestore';
-import AppStyles from '../Styling/AppStyles'; 
-
+import { getFirestore, collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import AppStyles from '../Styling/AppStyles';
 
 function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -12,73 +11,66 @@ function RegisterScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Check if email is valid
-const isValidEmail = (email) => {
-  const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-  return emailPattern.test(email);
-};
+  // Validate the structure of the email
+  const isValidEmail = (email) => {
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return emailPattern.test(email);
+  };
 
-// Check if password is valid
-const isValidPassword = (password) => {
-  return password.length >= 6;
-};
+  // Validate password length
+  const isValidPassword = (password) => {
+    return password.length >= 6;
+  };
 
   const handleRegister = async () => {
-    // Validate password
     if (password !== confirmPassword) {
-      alert("Passwords don't match!");
+      Alert.alert("Error", "Passwords don't match!");
       return;
     }
 
-     // Validate password
-  if (!isValidPassword(password)) {
-    alert('Password should be at least 6 characters long.');
-    return;
-  }
+    if (!isValidPassword(password)) {
+      Alert.alert("Error", 'Password should be at least 6 characters long.');
+      return;
+    }
 
-   // Validate email
-  if (!isValidEmail(email)) {
-    alert('Please enter a valid email address.');
-    return;
-};
-  
-    // Check if the username is already taken
+    if (!isValidEmail(email)) {
+      Alert.alert("Error", 'Please enter a valid email address.');
+      return;
+    }
+
+    // Verify if the username is unique
     const db = getFirestore();
     const usernameQuery = query(collection(db, 'users'), where('username', '==', username));
     const usernameSnapshot = await getDocs(usernameQuery);
   
     if (!usernameSnapshot.empty) {
-      alert('This username is already taken. Please choose another.');
+      Alert.alert("Error", 'This username is already taken. Please choose another.');
       return;
     }
-  
+
+    // Firebase authentication
     const auth = getAuth();
   
     createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
-        // Registration succeeded
         const user = userCredential.user;
-  
-        // Write user data to Firestore
+
+        // Store user data in Firestore
         await setDoc(doc(db, 'users', user.uid), {
           email: email,
           name: name,
           username: username
         });
-  
+
         console.log("User registered:", user);
         navigation.navigate('Main', { screen: 'Conversations' });
-  
       })
       .catch((error) => {
-        const errorCode = error.code;
         const errorMessage = error.message;
-        console.error("Error registering user:", errorCode, errorMessage);
-        alert(errorMessage);
+        console.error("Error registering user:", errorMessage);
+        Alert.alert("Error", errorMessage);
       });
   };
-  
-
 
   return (
     <View style={AppStyles.container}>
@@ -88,13 +80,13 @@ const isValidPassword = (password) => {
         onChangeText={setEmail}
         value={email}
       />
-       <TextInput 
+      <TextInput 
         style={AppStyles.input}
         placeholder="Name" 
         onChangeText={setName}
         value={name}
       />
-       <TextInput 
+      <TextInput 
         style={AppStyles.input}
         placeholder="Username" 
         onChangeText={setUsername}
@@ -115,13 +107,13 @@ const isValidPassword = (password) => {
         value={confirmPassword}
       />
 
-<TouchableOpacity style={AppStyles.registerButton} onPress={handleRegister}>
-                <Text style={AppStyles.buttonText}>Register</Text>
-                </TouchableOpacity>
+      <TouchableOpacity style={AppStyles.registerButton} onPress={handleRegister}>
+        <Text style={AppStyles.buttonText}>Register</Text>
+      </TouchableOpacity>
 
       <Text style={AppStyles.link} onPress={() => navigation.navigate('Login')}>Already have an account? Log in</Text>
     </View>
   );
-};
+}
 
 export default RegisterScreen;

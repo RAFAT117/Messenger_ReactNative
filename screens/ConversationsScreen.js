@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth } from 'firebase/auth';
 import { View, Text, FlatList } from 'react-native';
-import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import AppStyles from '../Styling/AppStyles'; 
 
 function ConversationsScreen({ navigation }) {
@@ -10,6 +10,7 @@ function ConversationsScreen({ navigation }) {
     const db = getFirestore();
     const currentUser = auth.currentUser;
 
+    // Fetch the names of friends
     const fetchFriendNames = async () => {
         if (currentUser) {
             const userDoc = doc(db, 'users', currentUser.uid);
@@ -30,38 +31,38 @@ function ConversationsScreen({ navigation }) {
         }
     };
 
+    // Set up a snapshot listener to update friends list in real-time
     useEffect(() => {
         const userDoc = doc(db, 'users', currentUser.uid);
 
-        const unsubscribe = onSnapshot(userDoc, (snapshot) => {
+        const unsubscribe = onSnapshot(userDoc, () => {
             fetchFriendNames();
         });
 
-        // Clean up the listener on unmount
-        return () => unsubscribe();
+        return () => unsubscribe();  // Clean up the listener on unmount
 
-    }, []);
+    }, [db, currentUser]);
 
     return (
         <View style={AppStyles.freinds_container}>
             {
+                // Conditional rendering based on whether there are friends or not
                 friendsData.length === 0 ?
                 <Text style={AppStyles.noFriendsText}>No friends available.</Text> :
-
-                    <FlatList
-                        data={friendsData}
-                        keyExtractor={(item) => item.uid}
-                        renderItem={({ item }) => (
-                            <View>
-                                <Text
-                                    style={AppStyles.friendName}
-                                    onPress={() => navigation.navigate('Chat', { friendUID: item.uid })}
-                                >
-                                    {item.name}
-                                </Text>
-                            </View>
-                        )}
-                    />
+                <FlatList
+                    data={friendsData}
+                    keyExtractor={(item) => item.uid}
+                    renderItem={({ item }) => (
+                        <View>
+                            <Text
+                                style={AppStyles.friendName}
+                                onPress={() => navigation.navigate('Chat', { friendUID: item.uid })}
+                            >
+                                {item.name}
+                            </Text>
+                        </View>
+                    )}
+                />
             }
         </View>
     );

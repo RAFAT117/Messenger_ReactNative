@@ -10,39 +10,39 @@ function ChatScreen({ route }) {
     const auth = getAuth();
     const currentUserUID = auth.currentUser.uid;
     const db = getFirestore();
+    const chatId = [currentUserUID, friendUID].sort().join('_'); // Compute chatId for consistent referencing
 
-    
-
-    const chatId = [currentUserUID, friendUID].sort().join('_'); // Compute chatId
-    
     // Listen for new messages from Firebase
     useEffect(() => {
         const messagesRef = doc(db, 'chats', chatId);
-    
+
+        // Subscribe to updates on the 'chats' collection
         const unsubscribe = onSnapshot(messagesRef, (documentSnapshot) => {
             if (documentSnapshot.exists()) {
+                // Convert Firebase timestamp to JS Date object
                 const firebaseMessages = documentSnapshot.data().messages.map(message => ({
                     ...message,
-                    createdAt: message.createdAt.toDate() 
+                    createdAt: message.createdAt.toDate()
                 }));
                 setMessages(firebaseMessages.reverse());
             }
         });
-    
+
+        // Clean up the subscription on component unmount
         return () => unsubscribe();
-    }, []);
-    
+    }, [db, chatId]);
+
     const onSend = async (newMessages = []) => {
         const message = newMessages[0];
-        
         const chatRef = doc(db, 'chats', chatId);
-        
+
+        // Add new message to the chat document in Firebase
         await setDoc(chatRef, {
             messages: arrayUnion({
                 ...message,
                 user: {
                     ...message.user,
-                    _id: currentUserUID 
+                    _id: currentUserUID
                 }
             })
         }, { merge: true });
@@ -54,7 +54,6 @@ function ChatScreen({ route }) {
             onSend={newMessages => onSend(newMessages)}
             user={{
                 _id: currentUserUID,
-                // Other user properties here
             }}
         />
     );
