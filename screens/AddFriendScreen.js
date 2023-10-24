@@ -4,12 +4,14 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, query, where, getDocs, getDoc, collection, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 
+
 function AddFriendScreen() {
   const [searchUsername, setSearchUsername] = useState('');
   const [friendRequestsData, setFriendRequestsData] = useState([]);  // array to store user data of friend requests
   const auth = getAuth();
   const db = getFirestore();
   const currentUser = auth.currentUser;
+  
 
   // Fetch friend requests for the logged-in user
   useEffect(() => {
@@ -33,7 +35,7 @@ function AddFriendScreen() {
               const userData = userSnapshot.data();
               usersData.push({
                   uid: uid,
-                  username: userData.username  // or any other data you need
+                  username: userData.username  
               });
           }
       }
