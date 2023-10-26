@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert, FlatList } from 'react-native';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, query, where, getDocs, getDoc, doc, updateDoc, arrayUnion, arrayRemove, collection } from 'firebase/firestore';
+import { getFirestore, query, where, getDocs, getDoc, doc, updateDoc, arrayUnion, arrayRemove, collection,onSnapshot } from 'firebase/firestore';
 import AppStyles from '../Styling/AppStyles';
 
 function AddFriendScreen() {
@@ -15,14 +15,20 @@ function AddFriendScreen() {
     useEffect(() => {
         if (currentUser) {
             const userDoc = doc(db, 'users', currentUser.uid);
-            getDoc(userDoc).then(documentSnapshot => {
+            
+            // This will set up a listener on the user's document
+            const unsubscribe = onSnapshot(userDoc, (documentSnapshot) => {
                 if (documentSnapshot.exists() && documentSnapshot.data().friendRequests) {
                     const uids = documentSnapshot.data().friendRequests;
                     fetchFriendRequestUsersData(uids);
                 }
             });
+    
+            // Clean up the listener when the component is unmounted
+            return () => unsubscribe();
         }
     }, []);
+    
 
     // Fetch user data for each friend request UID
     const fetchFriendRequestUsersData = async (uids) => {
